@@ -1,0 +1,65 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.0;net40</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <AssemblyTitle>Mechanism.Wpf.Core</AssemblyTitle>
+    <Product>Mechanism.Wpf.Core</Product>
+    <Copyright>Copyright © Start9 Contributors 2019</Copyright>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Themes\Colors\DarkPlexBlueOld.xaml" />
+    <None Remove="Themes\Colors\LightPlexBlueOld.xaml" />
+    <None Remove="Themes\Colors\ShaleBaseDarkOld.xaml" />
+    <None Remove="Themes\Colors\ShaleBaseLightOld.xaml" />
+    <None Remove="Themes\Colors\ShaleBeigeOld.xaml" />
+    <None Remove="Themes\Colors\ShaleBlueOld.xaml" />
+    <None Remove="Themes\PlexOld.xaml" />
+    <None Remove="Themes\ShaleOld.xaml" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Resource Include="Fonts\Ubuntu-Bold.ttf" />
+    <Resource Include="Fonts\Ubuntu-BoldItalic.ttf" />
+    <Resource Include="Fonts\Ubuntu-Italic.ttf" />
+    <Resource Include="Fonts\Ubuntu-Light.ttf" />
+    <Resource Include="Fonts\Ubuntu-LightItalic.ttf" />
+    <Resource Include="Fonts\Ubuntu-Medium.ttf" />
+    <Resource Include="Fonts\Ubuntu-MediumItalic.ttf" />
+    <Resource Include="Fonts\Ubuntu-Regular.ttf" /> 
+    <Resource Include="Fonts\UFL.txt" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <!-- Not sure why this is neccesary - is this a bug? -->
+    <Reference Include="PresentationFramework.Classic" /> 
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Page Update="Themes\Colors\ShaleBaseDarkOld.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Statics\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="System.Windows.Interactivity.WPF" Version="2.0.20525" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.Windows.Interactivity">
+      <HintPath>..\..\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

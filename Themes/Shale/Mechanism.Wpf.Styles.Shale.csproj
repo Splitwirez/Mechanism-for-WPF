@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFrameworks>netcoreapp3.0;net40</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Themes\Colors\Accent.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ColorMine" Version="1.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Mechanism.Wpf.Core\Mechanism.Wpf.Core.csproj" />
+  </ItemGroup>
+</Project>
