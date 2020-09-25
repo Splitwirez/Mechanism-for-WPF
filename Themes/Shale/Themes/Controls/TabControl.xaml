@@ -114,7 +114,32 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0" Margin="0">
-                            <flr:TravellingSelector TargetPanel="{Binding ElementName=HeaderPanel}" SelectedObjectIndex="{TemplateBinding SelectedIndex}" CollectionSize="{Binding Items.Count, RelativeSource={RelativeSource Mode=TemplatedParent}}" AnimationDuration="0:0:0.250" Width="{Binding ActualWidth, ElementName=HeaderPanel}" Height="{Binding ActualHeight, ElementName=HeaderPanel}">
+                            <flr:ConnectedSelector TargetPanel="{Binding ElementName=HeaderPanel}" SelectedObjectIndex="{TemplateBinding SelectedIndex}" CollectionSize="{Binding Items.Count, RelativeSource={RelativeSource Mode=TemplatedParent}}" Width="{Binding ActualWidth, ElementName=HeaderPanel}" Height="{Binding ActualHeight, ElementName=HeaderPanel}" AnimationDuration="0:0:0.250">
+                                <flr:ConnectedSelector.AnimationEase>
+                                    <CubicEase EasingMode="EaseOut"/>
+                                </flr:ConnectedSelector.AnimationEase>
+                                <flr:ConnectedSelector.Template>
+                                    <ControlTemplate TargetType="{x:Type flr:ConnectedSelector}">
+                                        <Canvas Background="#01000000">
+                                            <Border x:Name="PART_Selector" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="{TemplateBinding SelectionLeft}" Canvas.Top="{TemplateBinding SelectionTop}" Canvas.Right="{TemplateBinding SelectionRight}" Canvas.Bottom="{TemplateBinding SelectionBottom}" Width="{TemplateBinding SelectionWidth}" Height="{TemplateBinding SelectionHeight}">
+                                                <Border Margin="-2,0,-2,1" ClipToBounds="True">
+                                                    <Border x:Name="SelectedBorder" Margin="4,0" BorderBrush="{DynamicResource SelectedHighlightBrush}" BorderThickness="0,0,0,2" RenderTransformOrigin="0.5,1">
+                                                        <Border.RenderTransform>
+                                                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                        </Border.RenderTransform>
+                                                        <Rectangle Fill="{Binding BorderBrush, ElementName=SelectedBorder}" Opacity="1" Height="2" VerticalAlignment="Bottom" Margin="0,-2">
+                                                            <Rectangle.Effect>
+                                                                <BlurEffect Radius="5"/>
+                                                            </Rectangle.Effect>
+                                                        </Rectangle>
+                                                    </Border>
+                                                </Border>
+                                            </Border>
+                                        </Canvas>
+                                    </ControlTemplate>
+                                </flr:ConnectedSelector.Template>
+                            </flr:ConnectedSelector>
+                            <!--flr:TravellingSelector TargetPanel="{Binding ElementName=HeaderPanel}" SelectedObjectIndex="{TemplateBinding SelectedIndex}" CollectionSize="{Binding Items.Count, RelativeSource={RelativeSource Mode=TemplatedParent}}" AnimationDuration="0:0:0.250" Width="{Binding ActualWidth, ElementName=HeaderPanel}" Height="{Binding ActualHeight, ElementName=HeaderPanel}">
                                 <flr:TravellingSelector.AnimationEase>
                                     <CubicEase EasingMode="EaseOut"/>
                                 </flr:TravellingSelector.AnimationEase>
@@ -138,7 +163,10 @@
                                         </Grid>
                                     </ControlTemplate>
                                 </flr:TravellingSelector.Template>
-                            </flr:TravellingSelector>
+                            </flr:TravellingSelector-->
+                            <flr:ConnectedSelector>
+                                
+                            </flr:ConnectedSelector>
                             <UniformGrid Name="HeaderPanel" Panel.ZIndex="1" IsItemsHost="True" KeyboardNavigation.TabIndex="1" Rows="1"/>
                         </Grid>
                         <Border x:Name="Border" Grid.Row="1" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0" CornerRadius="0" KeyboardNavigation.TabNavigation="Local" KeyboardNavigation.DirectionalNavigation="Contained" KeyboardNavigation.TabIndex="2">
