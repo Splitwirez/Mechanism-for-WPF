@@ -518,11 +518,14 @@ namespace Mechanism.Wpf.Core.Windows
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            Handle = new WindowInteropHelper(this).EnsureHandle();
-            //NativeMethods.SetWindowLong(Handle, NativeMethods.GwlStyle, NativeMethods.GetWindowLong(Handle, NativeMethods.GwlStyle).ToInt32() & ~(0x00000000 | 0x00C00000 | 0x00800000 | 0x00080000 | 0x00040000));
-            HwndSource.FromHwnd(Handle).CompositionTarget.BackgroundColor = Colors.Transparent;
-            HwndSource.FromHwnd(Handle).AddHook(new HwndSourceHook(CompositingWindowWndProc));
-            SetCompositionState(CompositionState);
+            if (!_isClosingNow)
+            {
+                Handle = new WindowInteropHelper(this).EnsureHandle();
+                //NativeMethods.SetWindowLong(Handle, NativeMethods.GwlStyle, NativeMethods.GetWindowLong(Handle, NativeMethods.GwlStyle).ToInt32() & ~(0x00000000 | 0x00C00000 | 0x00800000 | 0x00080000 | 0x00040000));
+                HwndSource.FromHwnd(Handle).CompositionTarget.BackgroundColor = Colors.Transparent;
+                HwndSource.FromHwnd(Handle).AddHook(new HwndSourceHook(CompositingWindowWndProc));
+                SetCompositionState(CompositionState);
+            }
         }
 
         bool _isClosingNow = false;
