@@ -37,6 +37,13 @@ namespace Mechanism.Wpf.Core.Windows
     [ContentProperty("Content")]
     public partial class DecoratableWindow : ShadowedWindow
     {
+        internal enum DragState
+        {
+            NotDragging,
+            IsDragging,
+            DragCancelled
+        }
+
         const String PartTitlebar = "PART_Titlebar";
         const String PartFullscreenButton = "PART_FullscreenButton";
         const String PartMinimizeButton = "PART_MinimizeButton";
@@ -201,6 +208,15 @@ namespace Mechanism.Wpf.Core.Windows
         public static readonly DependencyProperty TitlebarHeightProperty =
             DependencyProperty.Register("TitlebarHeight", typeof(double), typeof(DecoratableWindow), new PropertyMetadata(30.0));
 
+        public Style DragOverlayStyle
+        {
+            get => (Style)GetValue(DragOverlayStyleProperty);
+            set => SetValue(DragOverlayStyleProperty, value);
+        }
+
+        public static readonly DependencyProperty DragOverlayStyleProperty =
+            DependencyProperty.Register(nameof(DragOverlayStyle), typeof(Style), typeof(DecoratableWindow), new PropertyMetadata());
+
         /*static DecoratableWindow()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(DecoratableWindow), new FrameworkPropertyMetadata("{x:Type apictrl:DecoratableWindow}"));
@@ -216,8 +232,65 @@ namespace Mechanism.Wpf.Core.Windows
             DefaultStyleKeyProperty.OverrideMetadata(typeof(DecoratableWindow), new FrameworkPropertyMetadata(typeof(DecoratableWindow)));
         }*/
 
+        ShadowedWindow _dragOverlayWindow = null;
+
         public DecoratableWindow() : base()
         {
+            _dragOverlayWindow = new ShadowedWindow()
+            {
+                Visibility = Visibility.Hidden,
+                Topmost = true
+            };
+            _dragOverlayWindow.SourceInitialized += (sneder, args) =>
+            {
+                NativeMethods.SetWindowLong(_dragOverlayWindow.Handle, NativeMethods.GwlExstyle, (Int32)NativeMethods.GetWindowLong(_dragOverlayWindow.Handle, NativeMethods.GwlExstyle) | NativeMethods.WsExToolwindow | NativeMethods.WsExTransparent);
+            };
+
+            Binding dragOverlayStyleBinding = new Binding()
+            {
+                Source = this,
+                Path = new PropertyPath("DragOverlayStyle"),
+                Mode = BindingMode.OneWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            BindingOperations.SetBinding(_dragOverlayWindow, Window.StyleProperty, dragOverlayStyleBinding);
+
+            Binding dragOverlayMinWidthBinding = new Binding()
+            {
+                Source = this,
+                Path = new PropertyPath("MinWidth"),
+                Mode = BindingMode.OneWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            BindingOperations.SetBinding(_dragOverlayWindow, Window.MinWidthProperty, dragOverlayMinWidthBinding);
+
+            Binding dragOverlayMinHeightBinding = new Binding()
+            {
+                Source = this,
+                Path = new PropertyPath("MinHeight"),
+                Mode = BindingMode.OneWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            BindingOperations.SetBinding(_dragOverlayWindow, Window.MinHeightProperty, dragOverlayMinHeightBinding);
+
+            Binding dragOverlayMaxWidthBinding = new Binding()
+            {
+                Source = this,
+                Path = new PropertyPath("MaxWidth"),
+                Mode = BindingMode.OneWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            BindingOperations.SetBinding(_dragOverlayWindow, Window.MaxWidthProperty, dragOverlayMaxWidthBinding);
+
+            Binding dragOverlayMaxHeightBinding = new Binding()
+            {
+                Source = this,
+                Path = new PropertyPath("MaxHeight"),
+                Mode = BindingMode.OneWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            BindingOperations.SetBinding(_dragOverlayWindow, Window.MaxHeightProperty, dragOverlayMaxHeightBinding);
+
             /*base.WindowStyle = WindowStyle.None;
             base.AllowsTransparency = true;*/
 
@@ -349,7 +422,7 @@ namespace Mechanism.Wpf.Core.Windows
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            
+
             _titlebar = GetTemplateChild(PartTitlebar) as Thumb;
             if (_titlebar != null)
             {
@@ -370,77 +443,97 @@ namespace Mechanism.Wpf.Core.Windows
 
             _minButton = GetTemplateChild(PartMinimizeButton) as Button;
             if (_minButton != null)
-                _minButton.Click += (sneder, args) =>
-                {
-                    WindowState = WindowState.Minimized;
-                };
+                _minButton.Click += (sneder, args) => WindowState = WindowState.Minimized;
 
 
             _maxButton = GetTemplateChild(PartMaximizeButton) as Button;
             if (_maxButton != null)
-                _maxButton.Click += (sneder, args) =>
-                {
-                    WindowState = WindowState.Maximized;
-                };
+                _maxButton.Click += (sneder, args) => WindowState = WindowState.Maximized;
 
 
             _restButton = GetTemplateChild(PartRestoreButton) as Button;
             if (_restButton != null)
-                _restButton.Click += (sneder, args) =>
-                {
-                    WindowState = WindowState.Normal;
-                };
+                _restButton.Click += (sneder, args) => WindowState = WindowState.Normal;
 
             _closeButton = GetTemplateChild(PartCloseButton) as Button;
             if (_closeButton != null)
-                _closeButton.Click += (sneder, args) =>
-                {
-                    Close();
-                };
+                _closeButton.Click += (sneder, args) => Close();
 
-
-            _thumbBottom = GetTemplateChild(PartThumbBottom) as Thumb;
-            if (_thumbBottom != null)
-                _thumbBottom.DragDelta += ThumbBottom_DragDelta;
-
-
-            _thumbTop = GetTemplateChild(PartThumbTop) as Thumb;
-            if (_thumbTop != null)
-                _thumbTop.DragDelta += ThumbTop_DragDelta;
-
-
-            _thumbBottomRightCorner = GetTemplateChild(PartThumbBottomRightCorner) as Thumb;
-            if (_thumbBottomRightCorner != null)
-                _thumbBottomRightCorner.DragDelta += ThumbBottomRightCorner_DragDelta;
-
-
-            _thumbTopRightCorner = GetTemplateChild(PartThumbTopRightCorner) as Thumb;
-            if (_thumbTopRightCorner != null)
-                _thumbTopRightCorner.DragDelta += ThumbTopRightCorner_DragDelta;
-
-
-            _thumbTopLeftCorner = GetTemplateChild(PartThumbTopLeftCorner) as Thumb;
-            if (_thumbTopLeftCorner != null)
-                _thumbTopLeftCorner.DragDelta += ThumbTopLeftCorner_DragDelta;
-
-
-            _thumbBottomLeftCorner = GetTemplateChild(PartThumbBottomLeftCorner) as Thumb;
-            if (_thumbBottomLeftCorner != null)
-                _thumbBottomLeftCorner.DragDelta += ThumbBottomLeftCorner_DragDelta;
-
-
-            _thumbRight = GetTemplateChild(PartThumbRight) as Thumb;
-            if (_thumbRight != null)
-                _thumbRight.DragDelta += ThumbRight_DragDelta;
 
 
             _thumbLeft = GetTemplateChild(PartThumbLeft) as Thumb;
             if (_thumbLeft != null)
+            {
+                _thumbLeft.DragStarted += ThumbAny_DragStarted;
+                _thumbLeft.DragCompleted += ThumbAny_DragCompleted;
                 _thumbLeft.DragDelta += ThumbLeft_DragDelta;
+            }
+
+            _thumbTop = GetTemplateChild(PartThumbTop) as Thumb;
+            if (_thumbTop != null)
+            {
+                _thumbTop.DragStarted += ThumbAny_DragStarted;
+                _thumbTop.DragCompleted += ThumbAny_DragCompleted;
+                _thumbTop.DragDelta += ThumbTop_DragDelta;
+            }
+
+            _thumbRight = GetTemplateChild(PartThumbRight) as Thumb;
+            if (_thumbRight != null)
+            {
+                _thumbRight.DragStarted += ThumbAny_DragStarted;
+                _thumbRight.DragCompleted += ThumbAny_DragCompleted;
+                _thumbRight.DragDelta += ThumbRight_DragDelta;
+            }
+
+            _thumbBottom = GetTemplateChild(PartThumbBottom) as Thumb;
+            if (_thumbBottom != null)
+            {
+                _thumbBottom.DragStarted += ThumbAny_DragStarted;
+                _thumbBottom.DragCompleted += ThumbAny_DragCompleted;
+                _thumbBottom.DragDelta += ThumbBottom_DragDelta;
+            }
+
+            _thumbTopLeftCorner = GetTemplateChild(PartThumbTopLeftCorner) as Thumb;
+            if (_thumbTopLeftCorner != null)
+            {
+                _thumbTopLeftCorner.DragStarted += ThumbAny_DragStarted;
+                _thumbTopLeftCorner.DragCompleted += ThumbAny_DragCompleted;
+                _thumbTopLeftCorner.DragDelta += ThumbTopLeftCorner_DragDelta;
+            }
+
+            _thumbTopRightCorner = GetTemplateChild(PartThumbTopRightCorner) as Thumb;
+            if (_thumbTopRightCorner != null)
+            {
+                _thumbTopRightCorner.DragStarted += ThumbAny_DragStarted;
+                _thumbTopRightCorner.DragCompleted += ThumbAny_DragCompleted;
+                _thumbTopRightCorner.DragDelta += ThumbTopRightCorner_DragDelta;
+            }
+
+            _thumbBottomRightCorner = GetTemplateChild(PartThumbBottomRightCorner) as Thumb;
+            if (_thumbBottomRightCorner != null)
+            {
+                _thumbBottomRightCorner.DragStarted += ThumbAny_DragStarted;
+                _thumbBottomRightCorner.DragCompleted += ThumbAny_DragCompleted;
+                _thumbBottomRightCorner.DragDelta += ThumbBottomRightCorner_DragDelta;
+            }
+
+            _thumbBottomLeftCorner = GetTemplateChild(PartThumbBottomLeftCorner) as Thumb;
+            if (_thumbBottomLeftCorner != null)
+            {
+                _thumbBottomLeftCorner.DragStarted += ThumbAny_DragStarted;
+                _thumbBottomLeftCorner.DragCompleted += ThumbAny_DragCompleted;
+                _thumbBottomLeftCorner.DragDelta += ThumbBottomLeftCorner_DragDelta;
+            }
+
 
             _resizeGrip = GetTemplateChild(PartResizeGrip) as Thumb;
             if (_resizeGrip != null)
+            {
+                _resizeGrip.DragStarted += ThumbAny_DragStarted;
+                _resizeGrip.DragCompleted += ThumbAny_DragCompleted;
                 _resizeGrip.DragDelta += ThumbBottomRightCorner_DragDelta;
+            }
+
 
             _systemMenuRestore = GetTemplateChild(PartSystemMenuRestore) as MenuItem;
             if (_systemMenuRestore != null)
@@ -454,7 +547,7 @@ namespace Mechanism.Wpf.Core.Windows
                     {
                         var titlebarPoint = _titlebar.PointToScreen(new Point(0, 0));
                         SystemScaling.CursorPosition = new Point(titlebarPoint.X + (_titlebar.ActualWidth / 2), titlebarPoint.Y + 10);
-                        
+
                         if (_titlebar.Cursor != Cursors.SizeAll)
                         {
                             _prevCursor = _titlebar.Cursor;
@@ -573,111 +666,143 @@ namespace Mechanism.Wpf.Core.Windows
             }
         }
 
-        void ScaledSetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags)
+
+        static uint _uFlags = 0x0004 | 0x0010;
+
+        int _oldX = 0;
+        int _oldY = 0;
+        int _oldCx = 100;
+        int _oldCy = 100;
+
+        int _newX = 0;
+        int _newY = 0;
+        int _newCx = 100;
+        int _newCy = 100;
+
+        DragState _dragResizingState = DragState.NotDragging;
+
+        void ThumbAny_DragStarted(object sender, DragStartedEventArgs e)
         {
-            NativeMethods.SetWindowPos(hWnd, hWndInsertAfter, SystemScaling.WpfUnitsToRealPixels(X), SystemScaling.WpfUnitsToRealPixels(Y), SystemScaling.WpfUnitsToRealPixels(cx), SystemScaling.WpfUnitsToRealPixels(cy), uFlags);
+            _dragResizingState = DragState.IsDragging;
+            PreviewKeyDown += DecoratableWindow_PreviewKeyDown;
+            _dragOverlayWindow.PreviewKeyDown += DecoratableWindow_PreviewKeyDown;
+
+            _oldX = (int)Left;
+            _oldY = (int)Top;
+            _oldCx = (int)Width;
+            _oldCy = (int)Height;
+            
+            _newX = (int)Left;
+            _newY = (int)Top;
+            _newCx = (int)Width;
+            _newCy = (int)Height;
+
+            if (!SystemParameters.DragFullWindows)
+            {
+                //NativeMethods.ShowWindow(_dragOverlayWindow.Handle, 8);
+                NativeMethods.SetWindowPos(_dragOverlayWindow.Handle, IntPtr.Zero, 0, 0, 0, 0, /*0x0004 | */0x0002 | 0x0001 | 0x0010);
+                _dragOverlayWindow.Visibility = Visibility.Visible;
+                //_dragOverlayWindow.Show();
+            }
         }
 
-        void ThumbBottomRightCorner_DragDelta(Object sender, DragDeltaEventArgs e)
+        private void DecoratableWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            /*if (Width + e.HorizontalChange > 10)
-                Width += e.HorizontalChange;
-            if (Height + e.VerticalChange > 10)
-                Height += e.VerticalChange;*/
-            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)(Width + e.HorizontalChange), (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
-            //SyncShadowToWindow();
-            //SyncShadowToWindowSize();
+            if (e.Key == Key.Escape)
+            {
+                _dragResizingState = DragState.DragCancelled;
+
+                NativeMethods.SetWindowPos(Handle, IntPtr.Zero, SystemScaling.WpfUnitsToRealPixels(_oldX), SystemScaling.WpfUnitsToRealPixels(_oldY), SystemScaling.WpfUnitsToRealPixels(_oldCx), SystemScaling.WpfUnitsToRealPixels(_oldCy), _uFlags);
+            }
+        }
+
+        void ScaledSetWindowPos(int X, int Y, int cx, int cy)
+        {
+            if (_dragResizingState != DragState.IsDragging)
+                _dragOverlayWindow.Visibility = Visibility.Hidden;
+            else
+            {
+                if (SystemParameters.DragFullWindows)
+                    NativeMethods.SetWindowPos(Handle, IntPtr.Zero, SystemScaling.WpfUnitsToRealPixels(X), SystemScaling.WpfUnitsToRealPixels(Y), SystemScaling.WpfUnitsToRealPixels(cx), SystemScaling.WpfUnitsToRealPixels(cy), _uFlags);
+                else
+                {
+                    _newX = X;
+                    _newY = Y;
+                    _newCx = cx;
+                    _newCy = cy;
+                    if (_dragResizingState == DragState.IsDragging)
+                        NativeMethods.SetWindowPos(_dragOverlayWindow.Handle, IntPtr.Zero, SystemScaling.WpfUnitsToRealPixels(X), SystemScaling.WpfUnitsToRealPixels(Y), SystemScaling.WpfUnitsToRealPixels(cx), SystemScaling.WpfUnitsToRealPixels(cy), _uFlags); //0x0010
+                    //X, Y, cx, cy
+                }
+            }
+        }
+
+        void ThumbAny_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            if ((!SystemParameters.DragFullWindows) && (_dragResizingState == DragState.IsDragging))
+            {
+                NativeMethods.SetWindowPos(Handle, IntPtr.Zero, SystemScaling.WpfUnitsToRealPixels(_newX), SystemScaling.WpfUnitsToRealPixels(_newY), SystemScaling.WpfUnitsToRealPixels(_newCx), SystemScaling.WpfUnitsToRealPixels(_newCy), _uFlags);
+                //SystemScaling.WpfUnitsToRealPixels((int)_dragOverlayWindow.Left), SystemScaling.WpfUnitsToRealPixels((int)_dragOverlayWindow.Top), SystemScaling.WpfUnitsToRealPixels((int)_dragOverlayWindow.Width), SystemScaling.WpfUnitsToRealPixels((int)_dragOverlayWindow.Height)
+                //
+            }
+            _dragOverlayWindow.Visibility = Visibility.Hidden;
+
+            _dragResizingState = DragState.NotDragging;
+            PreviewKeyDown -= DecoratableWindow_PreviewKeyDown;
+            _dragOverlayWindow.PreviewKeyDown -= DecoratableWindow_PreviewKeyDown;
+        }
+
+
+        void ThumbTopLeftCorner_DragDelta(Object sender, DragDeltaEventArgs e)
+        {
+            ScaledSetWindowPos((int)(Left + e.HorizontalChange), (int)(Top + e.VerticalChange), (int)(Width - e.HorizontalChange), (int)(Height - e.VerticalChange));
         }
 
         void ThumbTopRightCorner_DragDelta(Object sender, DragDeltaEventArgs e)
         {
-            /*if (Width + e.HorizontalChange > 10)
-                Width += e.HorizontalChange;
-            if (Top + e.VerticalChange > 10)
-            {
-                Top += e.VerticalChange;
-                Height -= e.VerticalChange;
-            }*/
-            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)(Top + e.VerticalChange), (int)(Width + e.HorizontalChange), (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
-            //SyncShadowToWindow();
-            //SyncShadowToWindowSize();
+            ScaledSetWindowPos((int)Left, (int)(Top + e.VerticalChange), (int)(Width + e.HorizontalChange), (int)(Height - e.VerticalChange));
         }
 
-        void ThumbTopLeftCorner_DragDelta(Object sender, DragDeltaEventArgs e)
+        void ThumbBottomRightCorner_DragDelta(Object sender, DragDeltaEventArgs e)
         {
-            /*if (Left + e.HorizontalChange > 10)
-            {
-                Left += e.HorizontalChange;
-                Width -= e.HorizontalChange;
-            }
-            if (Top + e.VerticalChange > 10)
-            {
-                Top += e.VerticalChange;
-                Height -= e.VerticalChange;
-            }*/
-            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)(Top + e.VerticalChange), (int)(Width - e.HorizontalChange), (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
-            //SyncShadowToWindow();
-            //SyncShadowToWindowSize();
+            ScaledSetWindowPos((int)Left, (int)Top, (int)(Width + e.HorizontalChange), (int)(Height + e.VerticalChange));
         }
 
         void ThumbBottomLeftCorner_DragDelta(Object sender, DragDeltaEventArgs e)
         {
-            /*if (Left + e.HorizontalChange > 10)
-            {
-                Left += e.HorizontalChange;
-                Width -= e.HorizontalChange;
-            }
-            if (Height + e.VerticalChange > 10)
-                Height += e.VerticalChange;*/
-            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)Top, (int)(Width - e.HorizontalChange), (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
-            //SyncShadowToWindow();
-            //SyncShadowToWindowSize();
+            ScaledSetWindowPos((int)(Left + e.HorizontalChange), (int)Top, (int)(Width - e.HorizontalChange), (int)(Height + e.VerticalChange));
         }
 
-        void ThumbRight_DragDelta(Object sender, DragDeltaEventArgs e)
-        {
-            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)(Width + e.HorizontalChange), (int)Height, 0x0004 | 0x0010);
-            /*if (Width + e.HorizontalChange > 10)
-                Width += e.HorizontalChange;*/
-            //SyncShadowToWindow();
-            //SyncShadowToWindowSize();
-        }
 
         void ThumbLeft_DragDelta(Object sender, DragDeltaEventArgs e)
         {
-            /*if (Left + e.HorizontalChange > 10)
-            {
-                Left += e.HorizontalChange;
-                Width -= e.HorizontalChange;
-            }*/
-            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)Top, (int)(Width - e.HorizontalChange), (int)Height, 0x0004 | 0x0010);
-            //SyncShadowToWindow();
-            //SyncShadowToWindowSize();
-        }
-
-        void ThumbBottom_DragDelta(Object sender, DragDeltaEventArgs e)
-        {
-            /*if (Height + e.VerticalChange > 10)
-                Height += e.VerticalChange;*/
-            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)Width, (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
-            //SyncShadowToWindow();
-            //SyncShadowToWindowSize();
+            ScaledSetWindowPos((int)(Left + e.HorizontalChange), (int)Top, (int)(Width - e.HorizontalChange), (int)Height);
         }
 
         void ThumbTop_DragDelta(Object sender, DragDeltaEventArgs e)
         {
-            /*if (Top + e.VerticalChange > 10)
-            {
-                Top += e.VerticalChange;
-                Height -= e.VerticalChange;
-            }*/
-            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)(Top + e.VerticalChange), (int)Width, (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
-            //SyncShadowToWindow();
-            //SyncShadowToWindowSize();
+            ScaledSetWindowPos((int)Left, (int)(Top + e.VerticalChange), (int)Width, (int)(Height - e.VerticalChange));
+        }
+
+        void ThumbRight_DragDelta(Object sender, DragDeltaEventArgs e)
+        {
+            ScaledSetWindowPos((int)Left, (int)Top, (int)(Width + e.HorizontalChange), (int)Height);
+        }
+
+        void ThumbBottom_DragDelta(Object sender, DragDeltaEventArgs e)
+        {
+            ScaledSetWindowPos((int)Left, (int)Top, (int)Width, (int)(Height + e.VerticalChange));
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _dragOverlayWindow.Close();
         }
     }
 
-    public class WindowStateIsMaximizedToBoolConverter : IValueConverter
+
+        public class WindowStateIsMaximizedToBoolConverter : IValueConverter
     {
         public Object Convert(Object value, Type targetType,
             Object parameter, CultureInfo culture)

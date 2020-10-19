@@ -294,7 +294,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
                     <Grid Margin="4,3,4,5">
-                        <Border x:Name="DropDownBorder" UseLayoutRounding="True" Effect="{DynamicResource DropShadow}" CornerRadius="3">
+                        <Border UseLayoutRounding="True" Effect="{DynamicResource DropShadow}" CornerRadius="3">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" GradientStops="{DynamicResource ButtonIdleBackgroundGradientStops}"/>
                             </Border.Background>

@@ -493,5 +493,42 @@ namespace Mechanism.Wpf.Core
 
         [DllImport("user32.dll")]
         public static extern bool ScreenToClient(IntPtr hWnd, ref POINT lpPoint);
+
+        [DllImport("user32.dll", EntryPoint = "DefWindowProcW")]
+        public static extern IntPtr DefWindowProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+        public enum WmNcHitTestValue
+        {
+            HtError = -2,
+            HtTransparent = -1,
+            HtNowhere = 0,
+            HtClient = 1,
+            HtCaption = 2,
+            HtSysMenu = 3,
+            HtGrowBox = 4,
+            HtMenu = 5,
+            HtHScroll = 6,
+            HtVScroll = 7,
+            HtMinButton = 8,
+            HtMaxButton = 9,
+            HtLeft = 10,
+            HtRight = 11,
+            HtTop = 12,
+            HtTopLeft = 13,
+            HtTopRight = 14,
+            HtBottom = 15,
+            HtBottomLeft = 16,
+            HtBottomRight = 17,
+            HtBorder = 18,
+            HtObject = 19,
+            HtClose = 20,
+            HtHelp = 21
+        }
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
     }
 }
