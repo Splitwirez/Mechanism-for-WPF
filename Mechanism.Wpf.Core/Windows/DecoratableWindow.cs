@@ -573,13 +573,18 @@ namespace Mechanism.Wpf.Core.Windows
             }
         }
 
+        void ScaledSetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags)
+        {
+            NativeMethods.SetWindowPos(hWnd, hWndInsertAfter, SystemScaling.WpfUnitsToRealPixels(X), SystemScaling.WpfUnitsToRealPixels(Y), SystemScaling.WpfUnitsToRealPixels(cx), SystemScaling.WpfUnitsToRealPixels(cy), uFlags);
+        }
+
         void ThumbBottomRightCorner_DragDelta(Object sender, DragDeltaEventArgs e)
         {
             /*if (Width + e.HorizontalChange > 10)
                 Width += e.HorizontalChange;
             if (Height + e.VerticalChange > 10)
                 Height += e.VerticalChange;*/
-            NativeMethods.SetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)(Width + e.HorizontalChange), (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
+            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)(Width + e.HorizontalChange), (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
             //SyncShadowToWindow();
             //SyncShadowToWindowSize();
         }
@@ -593,7 +598,7 @@ namespace Mechanism.Wpf.Core.Windows
                 Top += e.VerticalChange;
                 Height -= e.VerticalChange;
             }*/
-            NativeMethods.SetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)(Top + e.VerticalChange), (int)(Width + e.HorizontalChange), (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
+            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)(Top + e.VerticalChange), (int)(Width + e.HorizontalChange), (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
             //SyncShadowToWindow();
             //SyncShadowToWindowSize();
         }
@@ -610,7 +615,7 @@ namespace Mechanism.Wpf.Core.Windows
                 Top += e.VerticalChange;
                 Height -= e.VerticalChange;
             }*/
-            NativeMethods.SetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)(Top + e.VerticalChange), (int)(Width - e.HorizontalChange), (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
+            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)(Top + e.VerticalChange), (int)(Width - e.HorizontalChange), (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
             //SyncShadowToWindow();
             //SyncShadowToWindowSize();
         }
@@ -624,14 +629,14 @@ namespace Mechanism.Wpf.Core.Windows
             }
             if (Height + e.VerticalChange > 10)
                 Height += e.VerticalChange;*/
-            NativeMethods.SetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)Top, (int)(Width - e.HorizontalChange), (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
+            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)Top, (int)(Width - e.HorizontalChange), (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
             //SyncShadowToWindow();
             //SyncShadowToWindowSize();
         }
 
         void ThumbRight_DragDelta(Object sender, DragDeltaEventArgs e)
         {
-            NativeMethods.SetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)(Width + e.HorizontalChange), (int)Height, 0x0004 | 0x0010);
+            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)(Width + e.HorizontalChange), (int)Height, 0x0004 | 0x0010);
             /*if (Width + e.HorizontalChange > 10)
                 Width += e.HorizontalChange;*/
             //SyncShadowToWindow();
@@ -645,7 +650,7 @@ namespace Mechanism.Wpf.Core.Windows
                 Left += e.HorizontalChange;
                 Width -= e.HorizontalChange;
             }*/
-            NativeMethods.SetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)Top, (int)(Width - e.HorizontalChange), (int)Height, 0x0004 | 0x0010);
+            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)(Left + e.HorizontalChange), (int)Top, (int)(Width - e.HorizontalChange), (int)Height, 0x0004 | 0x0010);
             //SyncShadowToWindow();
             //SyncShadowToWindowSize();
         }
@@ -654,7 +659,7 @@ namespace Mechanism.Wpf.Core.Windows
         {
             /*if (Height + e.VerticalChange > 10)
                 Height += e.VerticalChange;*/
-            NativeMethods.SetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)Width, (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
+            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)Top, (int)Width, (int)(Height + e.VerticalChange), 0x0004 | 0x0010);
             //SyncShadowToWindow();
             //SyncShadowToWindowSize();
         }
@@ -666,7 +671,7 @@ namespace Mechanism.Wpf.Core.Windows
                 Top += e.VerticalChange;
                 Height -= e.VerticalChange;
             }*/
-            NativeMethods.SetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)(Top + e.VerticalChange), (int)Width, (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
+            ScaledSetWindowPos(Handle, IntPtr.Zero, (int)Left, (int)(Top + e.VerticalChange), (int)Width, (int)(Height - e.VerticalChange), 0x0004 | 0x0010);
             //SyncShadowToWindow();
             //SyncShadowToWindowSize();
         }
