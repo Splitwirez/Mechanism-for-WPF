@@ -242,7 +242,7 @@
                 </TabItem>
                 <TabItem Header="Smooth Scrolling">
                     <UniformGrid Rows="1">
-                        <GroupBox Header="ScrollViewer Smoothing Options">
+                        <GroupBox Header="ScrollViewer Smoothing Options" Visibility="Collapsed">
                             <StackPanel Orientation="Vertical">
                                 <CheckBox x:Name="EnableSmoothScrollingCheckBox" IsChecked="True">Enable Scroll Smoothing</CheckBox>
                                 <DockPanel>
@@ -278,7 +278,7 @@
                                 </Border>
                             </StackPanel>
                         </GroupBox>
-                        <ListView x:Name="SmoothScrollTestListView">
+                        <ListView x:Name="SmoothScrollTestListView" Visibility="Collapsed">
                             <ListViewItem>Item 1</ListViewItem>
                             <ListViewItem>Item 2</ListViewItem>
                             <ListViewItem>Item 3</ListViewItem>
@@ -319,6 +319,48 @@
                             <ListViewItem>Item 38</ListViewItem>
                             <ListViewItem>Item 39</ListViewItem>
                             <ListViewItem>Item 40</ListViewItem>
+                        </ListView>
+                        <ListView>
+                            <ListViewItem>Item 0</ListViewItem>
+                            <ListViewItem>Item 1</ListViewItem>
+                            <ListViewItem>Item 2</ListViewItem>
+                            <ListViewItem>Item 3</ListViewItem>
+                            <ListViewItem>Item 4</ListViewItem>
+                            <ListViewItem>Item 5</ListViewItem>
+                            <ListViewItem>Item 6</ListViewItem>
+                            <ListViewItem>Item 7</ListViewItem>
+                            <ListViewItem>Item 8</ListViewItem>
+                            <ListViewItem>Item 9</ListViewItem>
+                            <ListViewItem>Item 10</ListViewItem>
+                            <ListViewItem>Item 11</ListViewItem>
+                            <ListViewItem>Item 12</ListViewItem>
+                            <ListViewItem>Item 13</ListViewItem>
+                            <ListViewItem>Item 14</ListViewItem>
+                            <ListViewItem>Item 15</ListViewItem>
+                            <ListViewItem>Item 16</ListViewItem>
+                            <ListViewItem>Item 17</ListViewItem>
+                            <ListViewItem>Item 18</ListViewItem>
+                            <ListViewItem>Item 19</ListViewItem>
+                            <ListViewItem>Item 20</ListViewItem>
+                            <ListViewItem>Item 21</ListViewItem>
+                            <ListViewItem>Item 22</ListViewItem>
+                            <ListViewItem>Item 23</ListViewItem>
+                            <ListViewItem>Item 24</ListViewItem>
+                            <ListViewItem>Item 25</ListViewItem>
+                            <ListViewItem>Item 26</ListViewItem>
+                            <ListViewItem>Item 27</ListViewItem>
+                            <ListViewItem>Item 28</ListViewItem>
+                            <ListViewItem>Item 29</ListViewItem>
+                            <ListViewItem>Item 30</ListViewItem>
+                            <ListViewItem>Item 31</ListViewItem>
+                            <ListViewItem>Item 32</ListViewItem>
+                            <ListViewItem>Item 33</ListViewItem>
+                            <ListViewItem>Item 34</ListViewItem>
+                            <ListViewItem>Item 35</ListViewItem>
+                            <ListViewItem>Item 36</ListViewItem>
+                            <ListViewItem>Item 37</ListViewItem>
+                            <ListViewItem>Item 38</ListViewItem>
+                            <ListViewItem>Item 39</ListViewItem>
                         </ListView>
                     </UniformGrid>
                 </TabItem>
