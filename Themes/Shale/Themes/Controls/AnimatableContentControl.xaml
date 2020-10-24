@@ -28,7 +28,7 @@
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,0.75" GradientStops="{DynamicResource ButtonIdleBackgroundGradientStops}"/>
                                     </Border.Background>
                                     <DockPanel>
-                                        <Button x:Name="PART_CloseButton" Content="{DynamicResource AnimatableContentControlCloseButtonIcon}" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="{Binding HasCloseButton, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" DockPanel.Dock="Top">
+                                        <Button x:Name="PART_CloseButton" Content="{DynamicResource AnimatableContentControlCloseButtonIcon}" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="{Binding HasCloseButton, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" DockPanel.Dock="Top" Panel.ZIndex="99999999">
                                             <Button.Style>
                                                 <Style TargetType="{x:Type Button}">
                                                     <Setter Property="Width" Value="45"/>
